@@ -22,8 +22,8 @@ earth_state_wrt_sun, earth_sun_light_time = spiceypy.spkgeo(
 
 # The state vector is 6 dimensional: x, y, z in km and the corresponding velocities in km/s
 print(
-    'State vector of the Earth w.r.t. the Sun for "today" (midnight):\n',
-    earth_state_wrt_sun,
+    f'State vector of the Earth w.r.t. the Sun for {date_today} (midnight):\n' +
+    f'{earth_state_wrt_sun}'
 )
 
 # The (Euclidean) distance should be around 1 AU. Why "around"? Well the Earth revolves the Sun in
