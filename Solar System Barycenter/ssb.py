@@ -44,9 +44,12 @@ fig, ax = plt.subplots(figsize=(12, 12))
 sun_circ = plt.Circle((0.0, 0.0, 0.0), 1.0, color="yellow", alpha=0.6)
 ax.add_artist(sun_circ)
 
-ax.plot(ssb_wrt_sun_position_scaled_xy[:, 0],
-        ssb_wrt_sun_position_scaled_xy[:, 1],
-        ls="solid", color="royalblue")
+ax.plot(
+    ssb_wrt_sun_position_scaled_xy[:, 0],
+    ssb_wrt_sun_position_scaled_xy[:, 1],
+    ls="solid",
+    color="royalblue",
+)
 
 ax.set_aspect("equal")
 ax.grid(True, linestyle="dashed", alpha=0.5)
@@ -55,3 +58,6 @@ ax.set_ylim(-2, 2)
 
 ax.set_xlabel("x in sun-radii")
 ax.set_ylabel("y in sun-radii")
+
+ssb_wrt_sun_position_scaled = np.linalg.norm(ssb_wrt_sun_position_scaled, axis=1)
+ssb_outside_sun_delta_days = len(np.where(ssb_wrt_sun_position_scaled > 1)[0])
