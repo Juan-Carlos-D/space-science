@@ -44,6 +44,10 @@ fig, ax = plt.subplots(figsize=(12, 12))
 sun_circ = plt.Circle((0.0, 0.0, 0.0), 1.0, color="yellow", alpha=0.6)
 ax.add_artist(sun_circ)
 
+ax.plot(ssb_wrt_sun_position_scaled_xy[:, 0],
+        ssb_wrt_sun_position_scaled_xy[:, 1],
+        ls="solid", color="royalblue")
+
 ax.set_aspect("equal")
 ax.grid(True, linestyle="dashed", alpha=0.5)
 ax.set_xlim(-2, 2)
