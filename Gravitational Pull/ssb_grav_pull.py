@@ -127,7 +127,16 @@ for ax_f, planet_abr, planet_name in zip(
     ax_f_add.plot(
         solar_system_df["UTC"],
         solar_system_df[f"PHASE_ANGLE_SUN_{planet_abr}2SSB"],
-        color="tab:orange"
+        color="tab:orange",
     )
 
     ax_f_add.set_ylabel("Planet phase angle in deg.", color="tab:orange")
+    ax_f_add.tick_params(axis="y", labelcolor="tab:orange")
+
+    ax_f_add.invert_yaxis()
+    ax_f_add.set_ylim(180, 0)
+    ax_f.grid(axis="x", linestyle="dashed", alpha=0.5)
+
+ax2.set_xlabel("Date / Year")
+fig.tight_layout()
+plt.subplots_adjust(hspace=0.2)
