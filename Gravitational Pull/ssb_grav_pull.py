@@ -13,8 +13,7 @@ spiceypy.furnsh("../Kernels/spk/de432s.bsp")
 # We want to compute miscellaneous positions w.r.t. the centre of
 # the Sun for a certain time interval.
 # First, we set an initial time in UTC.
-init_time_utc = datetime.datetime(year=2000, month=1, day=1, \
-                                  hour=0, minute=0, second=0)
+init_time_utc = datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, second=0)
 # Add a number of days; you can play around with the datetime variables; but
 # leave it as it is for the first try, since other computations and comments
 # are based on this value.
@@ -22,12 +21,12 @@ delta_days = 10000
 end_time_utc = init_time_utc + datetime.timedelta(days=delta_days)
 
 # Convert the datetime objects now to strings
-init_time_utc_str = init_time_utc.strftime('%Y-%m-%dT%H:%H:%S')
-end_time_utc_str = end_time_utc.strftime('%Y-%m-%dT%H:%H:%S')
+init_time_utc_str = init_time_utc.strftime("%Y-%m-%dT%H:%H:%S")
+end_time_utc_str = end_time_utc.strftime("%Y-%m-%dT%H:%H:%S")
 
 # Print the starting and end times
-print('Init time in UTC: %s' % init_time_utc_str)
-print('End time in UTC: %s\n' % end_time_utc_str)
+print("Init time in UTC: %s" % init_time_utc_str)
+print("End time in UTC: %s\n" % end_time_utc_str)
 
 # Convert to Ephemeris Time (ET) using the SPICE function utc2et
 init_time_et = spiceypy.utc2et(init_time_utc_str)
@@ -41,7 +40,53 @@ time_interval_et = np.linspace(init_time_et, end_time_et, delta_days)
 # be close to the Sun, we scale the x, y, z component w.r.t the radius of the
 # Sun. We extract the Sun radii (x, y, z components of the Sun ellipsoid) and
 # use the x component
-_, radii_sun = spiceypy.bodvcd(bodyid=10, item='RADII', maxn=3)
+_, radii_sun = spiceypy.bodvcd(bodyid=10, item="RADII", maxn=3)
 
 radius_sun = radii_sun[0]
 
+solar_system_df = pd.DataFrame()
+solar_system_df.loc[:, "ET"] = time_interval_et
+
+solar_system_df.loc[:, "UTC"] = solar_system_df["ET"].apply(
+    lambda x: spiceypy.et2datetime(et=x).date()
+)
+solar_system_df.loc[:, "POS_SSB_WRT_SUN"] = solar_system_df["ET"].apply(
+    lambda x: spiceypy.spkgps(targ=0, et=x, ref="ECLIPJ2000", obs=10)[0]
+)
+solar_system_df.loc[:, "POS_SSB_WRT_SUN_SCALED"] = solar_system_df[
+    "POS_SSB_WRT_SUN"
+].apply(lambda x: x / radius_sun)
+solar_system_df.loc[:, "SSB_WRT_SUN_SCALED_DIST"] = solar_system_df[
+    "POS_SSB_WRT_SUN_SCALED"
+].apply(lambda x: spiceypy.vnorm(x))
+
+
+# Compute the Phase Angle
+NAIF_ID_DICT = {
+    "MER": 1,
+    "VEN": 2,
+    "EAR": 3,
+    "MAR": 4,
+    "JUP": 5,
+    "SAT": 6,
+    "URA": 7,
+    "NEP": 8,
+    "PLU": 9,
+}
+
+for planets_name_key in NAIF_ID_DICT:
+    planet_pos_col = f"POS_{planets_name_key}_WRT_SUN"
+    planet_angle_col = f"PHASE_ANGLE_SUN_{planets_name_key}2SSB"
+
+    planet_id = NAIF_ID_DICT[planets_name_key]
+
+    solar_system_df.loc[:, planet_pos_col] = solar_system_df["ET"].apply(
+        lambda x: spiceypy.spkgps(targ=planet_id, et=x, ref="ECLIPJ2000", obs=10)[0]
+    )
+
+    solar_system_df.loc[:, planet_angle_col] = solar_system_df.apply(
+        lambda x: np.degrees(spiceypy.vsep(x[planet_pos_col], x["POS_SSB_WRT_SUN"])),
+        axis=1,
+    )
+
+print(solar_system_df["PHASE_ANGLE_SUN_JUP2SSB"])
