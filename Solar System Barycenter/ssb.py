@@ -12,25 +12,25 @@ spiceypy.furnsh("../Kernels/spk/de432s.bsp")
 
 # We want to compute the Solar System Barycenter (SSB) wrt the center of
 # the Sun for a certain time interval
-#First, we set an initial time in UTC
+# First, we set an initial time in UTC
 init_time_utc = datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, second=0)
 
 # Add a number of days
 delta_days = 10000
 end_time_utc = init_time_utc + datetime.timedelta(days=delta_days)
 
-#Convert the datetime objects to strings
+# Convert the datetime objects to strings
 init_time_utc_str = init_time_utc.strftime("%Y-%m-%dT%H:%M:%S")
 end_time_utc_str = end_time_utc.strftime("%Y-%m-%dT%H:%M:%S")
 
 # Print the starting and end times
-print('Init time in UTC: %s' % init_time_utc_str)
-print('End time in UTC: %s\n' % end_time_utc_str)
+print("Init time in UTC: %s" % init_time_utc_str)
+print("End time in UTC: %s\n" % end_time_utc_str)
 
 # Convert to Ephemeris Time (ET) using the SPICE function utc2et
 init_time_et = spiceypy.utc2et(init_time_utc_str)
 end_time_et = spiceypy.utc2et(end_time_utc_str)
-### 
+###
 
 # Now we compute the position of the SSB wrt our Sun:
 # First we set an empty list that stores later all x, y, z components for each time step
@@ -52,10 +52,10 @@ for time_interval_et_f in time_interval_et:
 ssb_wrt_sun_position = np.array(ssb_wrt_sun_position)
 ###
 
-# We want to visualize the results to get a feeling of the movement. 
+# We want to visualize the results to get a feeling of the movement.
 # Using km is not intuitive. AU would scale it too severely. Since we compute
-# the SSB wrt the Sun; and since we expect it to be close to the Sun, we 
-# scale the x, y, z component wrt the radius of the Sun. We extract the 
+# the SSB wrt the Sun; and since we expect it to be close to the Sun, we
+# scale the x, y, z component wrt the radius of the Sun. We extract the
 # Sun radii (x, y, z components of the Sun ellipsoid) and use the x component
 _, radii_sun = spiceypy.bodvcd(bodyid=10, item="RADII", maxn=3)
 
@@ -89,15 +89,16 @@ ax.set_ylim(-2, 2)
 
 ax.set_xlabel("x in sun-radii")
 ax.set_ylabel("y in sun-radii")
-### 
+###
 
-# How many days is the SSB outside the Sun? First, we compute the euclidean 
+# How many days is the SSB outside the Sun? First, we compute the euclidean
 # distance between the SSB and Sun.
 ssb_wrt_sun_position_scaled = np.linalg.norm(ssb_wrt_sun_position_scaled, axis=1)
-print('computation time: %s days\n' % delta_days)
+print("computation time: %s days\n" % delta_days)
 
 # Compute the number of days outside the sun
 ssb_outside_sun_delta_days = len(np.where(ssb_wrt_sun_position_scaled > 1)[0])
-print('fraction of time where the ssb\n' \
-      'was outside the sun: %s %%' % (100 * ssb_outside_sun_delta_days \
-                                      / delta_days))
+print(
+    "fraction of time where the ssb\n"
+    "was outside the sun: %s %%" % (100 * ssb_outside_sun_delta_days / delta_days)
+)
