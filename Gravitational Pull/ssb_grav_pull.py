@@ -90,3 +90,44 @@ for planets_name_key in NAIF_ID_DICT:
     )
 
 print(solar_system_df["PHASE_ANGLE_SUN_JUP2SSB"])
+
+plt.style.use("dark_background")
+fig, (ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9) = plt.subplots(
+    9, 1, sharex=True, figsize=(8, 45)
+)
+for ax_f, planet_abr, planet_name in zip(
+    [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9],
+    ["MER", "VEN", "EAR", "MAR", "JUP", "SAT", "URA", "NEP", "PLU"],
+    [
+        "Mercury",
+        "Venus",
+        "Earth",
+        "Mars",
+        "Jupiter",
+        "Saturn",
+        "Uranus",
+        "Neptune",
+        "Pluto",
+    ],
+):
+    ax_f.set_title(planet_name, color="tab:orange")
+
+    ax_f.plot(
+        solar_system_df["UTC"],
+        solar_system_df["SSB_WRT_SUN_SCALED_DIST"],
+        color="tab:cyan",
+    )
+
+    ax_f.set_ylabel("SSB Dist. in Sun Radii", color="tab:cyan")
+    ax_f.tick_params(axis="y", labelcolor="tab:cyan")
+    ax_f.set_xlim(min(solar_system_df["UTC"]), max(solar_system_df["UTC"]))
+    ax_f.set_ylim(0, 2)
+
+    ax_f_add = ax_f.twinx()
+    ax_f_add.plot(
+        solar_system_df["UTC"],
+        solar_system_df[f"PHASE_ANGLE_SUN_{planet_abr}2SSB"],
+        color="tab:orange"
+    )
+
+    ax_f_add.set_ylabel("Planet phase angle in deg.", color="tab:orange")
