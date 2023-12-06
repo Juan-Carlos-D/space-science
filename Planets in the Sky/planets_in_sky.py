@@ -97,3 +97,60 @@ print(
     f'Number of photogenic hours: {len(inner_solsys_df.loc[inner_solsys_df["PHOTOGENIC"] == 1])}'
     f'(around {round(len(inner_solsys_df.loc[inner_solsys_df["PHOTOGENIC"] == 1]) / 24)} days)'
 )
+
+# Set dark mode
+plt.style.use("dark_background")
+
+# Set a figure
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Plot the miscellaneous phase angles; apply different colors for the curves
+# and set a legend label
+ax.plot(
+    inner_solsys_df["UTC"],
+    inner_solsys_df["EARTH_VEN2SUN_ANGLE"],
+    color="tab:orange",
+    label="Venus - Sun",
+)
+
+ax.plot(
+    inner_solsys_df["UTC"],
+    inner_solsys_df["EARTH_MOON2SUN_ANGLE"],
+    color="tab:cyan",
+    label="Moon - Sun",
+)
+
+ax.plot(
+    inner_solsys_df["UTC"],
+    inner_solsys_df["EARTH_MOON2VEN_ANGLE"],
+    color="tab:red",
+    label="Moon - Venus",
+)
+
+# Set a label for the x and y axis accordingly
+ax.set_xlabel("Date in UTC")
+ax.set_ylabel("Angle in degrees")
+
+# Set limits for the x and y axis
+ax.set_xlim(min(inner_solsys_df["UTC"]), max(inner_solsys_df["UTC"]))
+
+# Set a grid
+ax.grid(axis="x", linestyle="dashed", alpha=0.5)
+
+# Set a month and day locator for the plot
+ax.xaxis.set_major_locator(matpl_dates.MonthLocator())
+ax.xaxis.set_minor_locator(matpl_dates.DayLocator())
+
+# Set a format for the date-time (Year + Month name)
+ax.xaxis.set_major_formatter(matpl_dates.DateFormatter("%Y-%b"))
+
+# Iterate through the "photogenic" results and draw vertical lines where the
+# "photogenic" conditions apply
+for photogenic_utc in inner_solsys_df.loc[inner_solsys_df["PHOTOGENIC"] == 1]["UTC"]:
+    ax.axvline(photogenic_utc, color="tab:blue", alpha=0.2)
+
+# Create the legend in the top right corner of the plot
+ax.legend(fancybox=True, loc="upper right", framealpha=1)
+
+# Rotate the date-times
+plt.xticks(rotation=45)
