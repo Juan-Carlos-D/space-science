@@ -155,7 +155,7 @@ plt.xlabel("Eclip. long. in deg")
 plt.ylabel("Eclip. lat. in deg")
 
 # Create a legend and grid
-plt.legend()
+plt.legend(ncol=6)
 plt.grid(True)
 
 # Save the figure
