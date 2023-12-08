@@ -57,3 +57,30 @@ BODY_COLOR_ARRAY = [
     "b",
     "tab:purple",
 ]
+
+# Now we want the coordinates in equatorial J2000. For this purpose we
+# iterate through all celestial bodies
+for body_name in SOLSYS_DICT:
+    # First, compute the directional vector of the body as seen from Earth in
+    # J2000
+    solsys_df.loc[:, f"dir_{body_name}_wrt_earth_equ"] = solsys_df["ET"].apply(
+        lambda x: spiceypy.spkezp(
+            targ=SOLSYS_DICT[body_name], et=x, ref="J2000", abcorr="LT+S", obs=399
+        )[0]
+    )
+
+    # Compute the longitude and latitude values in equatorial J2000
+    # coordinates
+    solsys_df.loc[:, f"{body_name}_long_rad_equ"] = solsys_df[
+        f"dir_{body_name}_wrt_earth_equ"
+    ].apply(lambda x: spiceypy.recrad(x)[1])
+    solsys_df.loc[:, f"{body_name}_lat_rad_equ"] = solsys_df[
+        f"dir_{body_name}_wrt_earth_equ"
+    ].apply(lambda x: spiceypy.recrad(x)[2])
+
+    # Apply the same logic as shown before to compute the longitudes for the
+    # matplotlib figure
+    solsys_df.loc[:, f"{body_name}_long_rad4plot_equ"] = solsys_df[
+        f"{body_name}_long_rad_equ"
+    ].apply(lambda x: -1 * ((x % np.pi) - np.pi) if x > np.pi else -1 * x)
+
