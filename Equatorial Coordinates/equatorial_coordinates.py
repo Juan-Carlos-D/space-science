@@ -133,3 +133,61 @@ eclip_plane_df.loc[:, "j2000_long_rad4plot"] = eclip_plane_df["j2000_long_rad"].
 eclip_plane_df.loc[:, "j2000_lat_rad"] = eclip_plane_df["j2000_direction"].apply(
     lambda x: spiceypy.recrad(x)[2]
 )
+
+# We plot now the data in equatorial J2000. Again with a dark background and
+# the same properties as before
+plt.style.use("dark_background")
+plt.figure(figsize=(12, 8))
+plt.subplot(projection="aitoff")
+plt.title(f"{datetime_utc} UTC", fontsize=10)
+
+# Iterate through the celestial bodies and plot them
+for body_name, body_color in zip(SOLSYS_DICT, BODY_COLOR_ARRAY):
+    plt.plot(
+        solsys_df[f"{body_name}_long_rad4plot_equ"],
+        solsys_df[f"{body_name}_lat_rad_equ"],
+        color=body_color,
+        marker="o",
+        linestyle="None",
+        markersize=12,
+        label=body_name.capitalize(),
+    )
+
+# Plot the Ecliptic plane as a blue dotted line
+plt.plot(
+    eclip_plane_df["j2000_long_rad4plot"],
+    eclip_plane_df["j2000_lat_rad"],
+    color="tab:blue",
+    linestyle="None",
+    marker="o",
+    markersize=2,
+)
+
+# Convert the longitude values finally in right ascension hours
+plt.xticks(
+    ticks=np.radians(np.arange(-150, 180, 30)),
+    labels=[
+        "10 h",
+        "8 h",
+        "6 h",
+        "4 h",
+        "2 h",
+        "0 h",
+        "22 h",
+        "20 h",
+        "18 h",
+        "16 h",
+        "14 h",
+    ],
+)
+
+# Plot the labels
+plt.xlabel("Right ascension in hours")
+plt.ylabel("Declination in deg.")
+
+# Create a legend and grid
+plt.legend(ncol=6)
+plt.grid(True)
+
+# Save the figure
+plt.savefig("j2000_sky_map.png", dpi=300)
