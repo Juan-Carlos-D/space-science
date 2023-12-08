@@ -84,3 +84,27 @@ for body_name in SOLSYS_DICT:
         f"{body_name}_long_rad_equ"
     ].apply(lambda x: -1 * ((x % np.pi) - np.pi) if x > np.pi else -1 * x)
 
+
+# Before we plot the data, let's add the Ecliptic plane for the visualisation.
+# In ECLIPJ2000 the Ecliptic plane is the equator line (see corresponding
+# figure. The latitude is 0 degrees.
+
+# First, we create a separate dataframe for the ecliptic plane
+eclip_plane_df = pd.DataFrame()
+
+# Add the ecliptic longitude and latitude values for the plane. Note: here,
+# we need to use pi/2 (90 degrees) as the latitude, since we will apply a
+# SPICE function that expects spherical coordinates
+eclip_plane_df.loc[:, "ECLIPJ2000_long_rad"] = np.linspace(0, 2 * np.pi, 100)
+eclip_plane_df.loc[:, "ECLIPJ2000_lat_rad"] = np.pi / 2.0
+
+# Compute the directional vectors of the ecliptic plane for the different
+# longitude values (the latitude is constant). Apply the SPICE function sphrec
+# to transform the spherical coordinates to vectors. r=1 is the distance,
+# here in our case: normalised distance
+eclip_plane_df.loc[:, "ECLIPJ2000_direction"] = eclip_plane_df.apply(
+    lambda x: spiceypy.sphrec(
+        r=1, colat=x["ECLIPJ2000_lat_rad"], lon=x["ECLIPJ2000_long_rad"]
+    ),
+    axis=1,
+)
