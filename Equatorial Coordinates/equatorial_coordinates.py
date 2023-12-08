@@ -108,3 +108,28 @@ eclip_plane_df.loc[:, "ECLIPJ2000_direction"] = eclip_plane_df.apply(
     ),
     axis=1,
 )
+
+# Compute a transformation matrix between ECLIPJ2000 and J2000 for a fixed
+# date-time. Since both coordinate system are inertial (not changing in time)
+# the resulting matrix is the same for different ETs
+ecl2equ_mat = spiceypy.pxform(fromstr="ECLIPJ2000", tostr="J2000", et=datetime_et)
+
+# Compute the direction vectors of the Ecliptic plane in J2000 using the
+# transformation matrix
+eclip_plane_df.loc[:, "j2000_direction"] = eclip_plane_df["ECLIPJ2000_direction"].apply(
+    lambda x: ecl2equ_mat.dot(x)
+)
+
+# Compute now the longitude (and matplotlib compatible version) and the
+# latitude values using the SPICE function recrad
+eclip_plane_df.loc[:, "j2000_long_rad"] = eclip_plane_df["j2000_direction"].apply(
+    lambda x: spiceypy.recrad(x)[1]
+)
+
+eclip_plane_df.loc[:, "j2000_long_rad4plot"] = eclip_plane_df["j2000_long_rad"].apply(
+    lambda x: -1 * ((x % np.pi) - np.pi) if x > np.pi else -1 * x
+)
+
+eclip_plane_df.loc[:, "j2000_lat_rad"] = eclip_plane_df["j2000_direction"].apply(
+    lambda x: spiceypy.recrad(x)[2]
+)
